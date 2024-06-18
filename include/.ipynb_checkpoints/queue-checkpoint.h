@@ -110,7 +110,7 @@
  */
 
 
-#define LIST_INSERT_AFTER(listelm, elm, field)do {                     \
+#define LIST_INSERT_AFTER(listelm, elm, field) do {                     \
                 LIST_NEXT((elm), field) = LIST_NEXT((listelm), field);   \
                 if (LIST_NEXT((listelm), field) != NULL)                \
                         LIST_NEXT((listelm), field)->field.le_prev = &LIST_NEXT((elm), field); \
@@ -152,11 +152,12 @@
  * The "field" name is the link element as above. You can refer to LIST_INSERT_HEAD.
  * Note: this function has big differences with LIST_INSERT_HEAD !
  */
-#define LIST_INSERT_TAIL(head, elm, field)do {                         \
+#define LIST_INSERT_TAIL(head, elm, field) do {                         \
+                struct Page *curr;                                      \
                 if (LIST_EMPTY(head)) {                                 \
                         LIST_INSERT_HEAD(head, elm, field);             \
                 } else {                                                \
-                        struct type *curr = LIST_FIRST(head);           \
+                        curr = LIST_FIRST(head);                        \
                         while (LIST_NEXT(curr, field) != NULL) {        \
                                 curr = LIST_NEXT(curr, field);          \
                         }                                               \
