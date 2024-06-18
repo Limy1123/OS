@@ -4,6 +4,7 @@
 #include "env.h"
 #include "error.h"
 
+
 /* 这些变量由 mips_detect_memory() 设置 */
 u_long maxpa;            /* 最大物理地址 */
 u_long npage;            /* 内存页数 */
@@ -16,6 +17,7 @@ struct Page *pages;
 static u_long freemem;
 
 static struct Page_list page_free_list; /* 物理页面的空闲列表 */
+
 
 /* 概述：
     初始化 basemem 和 npage。
@@ -180,12 +182,13 @@ void page_init(void)
     freemem = ROUND(freemem, BY2PG);
 
     /* 步骤 3：将 `freemem` 以下的所有内存标记为已使用（将 `pp_ref` 字段设置为 1）。 */
-    for (int i = 0; i < freemem / BY2PG; i++) {
+    int i;
+    for (i = 0; i < freemem / BY2PG; i++) {
         pages[i].pp_ref = 1;
     }
 
     /* 步骤 4：将其他内存标记为空闲。 */
-    for (int i = freemem / BY2PG; i < npage; i++) {
+    for (i = freemem / BY2PG; i < npage; i++) {
         pages[i].pp_ref = 0;
         LIST_INSERT_HEAD(&page_free_list, &pages[i], pp_link);
     }

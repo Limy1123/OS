@@ -110,14 +110,13 @@
  */
 
 
-#define LIST_INSERT_AFTER(listelm, elm, field)do {                     \
-                LIST_NEXT((elm), field) = LIST_NEXT((listelm), field);  \
-                if (LIST_NEXT((listelm), field) != NULL)                \
-                        LIST_NEXT((listelm), field)->field.le_prev =    \
-                                &LIST_NEXT((elm), field);               \
-                LIST_NEXT((listelm), field) = (elm);                    \
-                (elm)->field.le_prev = &LIST_NEXT((listelm), field);    \
-        } while (0)
+#define LIST_INSERT_AFTER(listelm, elm, field)do {			\
+	if ((LIST_NEXT((elm), field) = LIST_NEXT((listelm), field)) != NULL)\
+		LIST_NEXT((listelm), field)->field.le_prev =		\
+		    &LIST_NEXT((elm), field);				\
+	LIST_NEXT((listelm), field) = (elm);				\
+	(elm)->field.le_prev = &LIST_NEXT((listelm), field);		\
+} while (0)
         // Note: assign a to b <==> a = b
         //Step 1, assign elm.next to listelem.next.
         //Step 2: Judge whether listelm.next is NULL, if not, then assign listelm.pre to a proper value.
@@ -153,15 +152,12 @@
  * The "field" name is the link element as above. You can refer to LIST_INSERT_HEAD.
  * Note: this function has big differences with LIST_INSERT_HEAD !
  */
-#define LIST_INSERT_TAIL(head, elm, field)do {                         \
-                struct type **tail = &LIST_FIRST(head);                 \
-                while (*tail != NULL) {                                 \
-                        tail = &LIST_NEXT(*tail, field);                \
-                }                                                       \
-                LIST_NEXT(elm, field) = NULL;                           \
-                *tail = elm;                                            \
-                (elm)->field.le_prev = tail;                            \
-        } while (0)
+#define LIST_INSERT_TAIL(head, elm, field){				\
+	(elm)->field.tqe_next = NULL;					\
+	(elm)->field.tqe_prev = (head)->tqh_last;			\
+	*(head)->tqh_last = (elm);					\
+	(head)->tqh_last = &(elm)->field.tqe_next;			\
+}
 /* finish your code here. */
 
 
