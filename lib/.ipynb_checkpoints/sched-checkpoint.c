@@ -14,42 +14,33 @@
 
 void sched_yield(void)
 {
-    static int count = 0;
-    struct Env *e;
-
-    // 检查当前环境的时间片是否用完
-    if (curenv) {
-        if (curenv->env_runs > 0) {
-            curenv->env_runs--;
-            return;
-        } else {
-            curenv->env_status = ENV_RUNNABLE;
-            LIST_INSERT_HEAD(&env_sched_list[1], curenv, env_sched_link);
+        static int select=0;
+        static int time_count=0;
+        static struct Env *pe=NULL;
+        static int i=0;
+        static int changed =0;
+        if(changed){
+                changed=0;
+                pe=NULL;
         }
-    }
-
-    // 从 env_sched_list[0] 中调度下一个就绪环境
-    while (1) {
-        // 如果 env_sched_list[0] 为空，切换到 env_sched_list[1]
-        if (LIST_EMPTY(&env_sched_list[0])) {
-            LIST_INIT(&env_sched_list[0]);
-            while (!LIST_EMPTY(&env_sched_list[1])) {
-                e = LIST_FIRST(&env_sched_list[1]);
-                LIST_REMOVE(e, env_sched_link);
-                LIST_INSERT_HEAD(&env_sched_list[0], e, env_sched_link);
-            }
+        while(pe==NULL||pe->env_status!=ENV_RUNNABLE){
+                LIST_FOREACH(pe,&env_sched_list[select],env_sched_link){
+                        if(pe->env_status==ENV_RUNNABLE&&pe->env_pri>0){
+                                time_count=pe->env_pri;
+                                break;
+                        }
+                }
+                if(pe!=NULL){
+                        break;
+                }
+                select=(select+1)%2;
         }
-
-        // 尝试调度 env_sched_list[0] 中的第一个环境
-        if (!LIST_EMPTY(&env_sched_list[0])) {
-            e = LIST_FIRST(&env_sched_list[0]);
-            LIST_REMOVE(e, env_sched_link);
-            curenv = e;
-            curenv->env_runs = curenv->env_pri - 1; // 设置时间片
-            env_run(curenv);
+        time_count--;
+        if(time_count<=0){
+                LIST_REMOVE(pe,env_sched_link);
+                LIST_INSERT_HEAD(&env_sched_list[(select+1)%2],pe,env_sched_link);
+                changed=1;
         }
-
-        // 没有可运行的环境，陷入死循环等待
-        while (1);
-    }
+        env_run(pe);
 }
+

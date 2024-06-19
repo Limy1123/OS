@@ -153,7 +153,7 @@
  * Note: this function has big differences with LIST_INSERT_HEAD !
  */
 #define LIST_INSERT_TAIL(head, elm, field) do {                         \
-                struct Page *curr;                                      \
+                typeof(elm) curr;                                       \
                 if (LIST_EMPTY(head)) {                                 \
                         LIST_INSERT_HEAD(head, elm, field);             \
                 } else {                                                \
@@ -164,6 +164,7 @@
                         LIST_INSERT_AFTER(curr, elm, field);            \
                 }                                                       \
         } while (0)
+
 /* finish your code here. */
 
 
