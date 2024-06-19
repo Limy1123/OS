@@ -320,14 +320,21 @@ load_icode(struct Env *e, u_char *binary, u_int size)
     u_long perm;
     
     /*Step 1: alloc a page. */
-
+    if ((r = page_alloc(&p)) < 0) {
+        panic("load_icode - page alloc error\n");
+    }
 
     /*Step 2: Use appropriate perm to set initial stack for new Env. */
     /*Hint: The user-stack should be writable? */
-
+    if ((r = page_insert(e->env_pgdir, p, USTACKTOP - BY2PG, perm)) < 0) {
+        panic("load_icode - page insert error\n");
+    }
 
     /*Step 3:load the binary by using elf loader. */
-
+    r = load_elf(binary, size, &entry_point, (void *)e, load_icode_mapper);
+    if (r < 0) {
+        panic("load_icode - load elf error\n");
+    }
 
     /***Your Question Here***/
     /*Step 4:Set CPU's PC register as appropriate value. */
