@@ -1,30 +1,31 @@
 OUTPUT_ARCH(mips)
-/*
-Set the architecture to mips.
-*/
 ENTRY(_start)
-/*
-Set the ENTRY point of the program to _start.
-*/
+
 SECTIONS
 {
-    /* 设置内核代码段的地址 */
-    . = 0x80010000;
-    .text : {
+  . = 0x80000080;
+  .expect_vec3 : {
+      *(.text.exc_vec3)
+  }
+
+  . = 0x80010000;
+  .text : {
         *(.text)
     }
 
-    /* 设置内核数据段的地址 */
-    .data : {
-        *(.data)
-    }
+  .bss  : {
+   *(.bss)
+   }
 
-    /* 设置 BSS 段的地址 */
-    .bss : {
-        *(.bss)
-    }
+  .data : {
+	*(.data)
+	}
 
+  .sdata : {
+    *(.sdata)
+  }
 
-    /* 结束地址 */
-    end = .;
+  . = 0x80400000;
+
+   end = . ;
 }
